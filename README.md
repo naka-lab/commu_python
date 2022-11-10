@@ -68,7 +68,7 @@ CommUとSotaをPythonから制御するためのプログラム．
 - GUIでCommUを操作するプログラム
   ```
   cd pycommu
-  commu_controller.py
+  python commu_controller.py
   ```
 - pythonからCommUを操作するプログラム例（IPは各自の環境に合わせて変更する）
   - CommUの場合：[commu_example.py](python_example/commu_example.py)
