@@ -2,7 +2,7 @@
 
 CommUとSotaをPythonから制御するためのプログラム．
 
-## CommUのネットワーク接続
+## CommU・Sotaのネットワーク接続
 - Wifi接続
   - [このページ](https://sota.vstone.co.jp/home/wi-fi_qrcode/)でWifi接続用のQRコードを生成
   - △ボタンと▽ボタンを同時に長押しする
@@ -19,7 +19,9 @@ CommUとSotaをPythonから制御するためのプログラム．
 - マイクの音量やその他の設定は，Webページ`http://192.168.*.*`から設定可能
 
 ## 環境構築
-### CommUのセットアップ
+### CommU・Sotaのセットアップ
+以下全てCommU・SotaにSSH接続して操作する．
+
 - エディタのインストール
   ```
   cd
@@ -59,7 +61,7 @@ CommUとSotaをPythonから制御するためのプログラム．
 - Eclipse 4.6 Neonを使えばMacでも同様の手順で実行可能
 
 ## プログラムの作成・実行
-### CommU内部PC
+### CommU・Sotaの内部PC
 - SSHで接続して`./run_server.sh`を実行（wifi接続，IPの確認，SSH接続は前述の「CommUのネットワーク接続」を参照）
 
 ### リモートPC
