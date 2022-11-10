@@ -54,7 +54,7 @@ class PyCommu():
 
         return json.loads(data.decode("utf-8"))
 
-    def _send( self, command, content=None, angles=None, ids=None, time=None, timeout=None ):
+    def _send( self, command, content=None, angles=None, ids=None, time=None, timeout=None, face_smile=None, face_search=None, age_and_sex=None, name=None ):
         data = {}
         data["com"] = command
 
@@ -63,7 +63,12 @@ class PyCommu():
         if ids is not None: data["ids"] = ids
         if time is not None: data["time"] = time
         if timeout is not None: data["timeout"] = timeout
-        
+        if face_smile is not None: data["face_smile"] = face_smile
+        if face_search is not None: data["face_search"] = face_search
+        if age_and_sex is not None: data["age_and_sex"] = age_and_sex
+        if name is not None: data["name"] = name
+
+
         line = json.dumps(data)+"\n"
         self.soc.send(bytes( line, 'utf-8'))
 
@@ -128,6 +133,18 @@ class PyCommu():
             elif res!="":
                 return res
 
+    def wait_for_speech_name(self, timeout=None):
+        while 1:
+            self._send( "get_recog_name", timeout= timeout if timeout is not None else 5000 )
+            res = self._read_data()
+            print(res)
+            res = res["string"]
+
+            if timeout is not None:
+                return res
+            elif res!="":
+                return res
+
     def start_face_tracking(self):
         self._send( "start_face_track" )
         return self._read_data()
@@ -135,3 +152,43 @@ class PyCommu():
     def stop_face_tracking(self):
         self._send( "stop_face_track" )
         return self._read_data()
+
+    def enable_face_estimation(self, search, smile, age_sex ):
+        self._send("enable_face_estimation", face_search=search, face_smile=smile, age_and_sex=age_sex )
+        return self._read_data()
+
+    def get_face_info(self):
+        self._send( "get_face_info" )
+        return self._read_data()
+
+    def add_user_data(self, name):
+        self._send( "add_user", name=name )
+        res = self._read_data()
+ 
+        if res["result"]==False:
+            print("顔登録エラー")
+            if res["code"]==-100:
+                print("Maybe, I know this face.")
+            elif res["code"]==-201:
+                print("Out of Range Angle Pitch")
+            elif res["code"]==-202:
+                print("Out of Range Angle Roll")
+            elif res["code"]==-203:
+                print("Out of Range Angle Yaw")
+            elif res["code"]==-300:
+                print("Out of Range Face Size")
+            elif res["code"]==-400:
+                print("Low FocusScore")
+            
+        return res
+
+    def remove_all_user(self):
+        self._send("remove_all_user")
+        return self._read_data()
+
+def main():
+    commu = PyCommu("sota")
+    commu.connect("192.168.1.12")
+
+if __name__ == '__main__':
+    main()
