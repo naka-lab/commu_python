@@ -18,6 +18,7 @@ import jp.vstone.RobotLib.CRobotMotion;
 import jp.vstone.RobotLib.CRobotPose;
 import jp.vstone.RobotLib.CSotaMotion;
 import jp.vstone.camera.CRoboCamera;
+import jp.vstone.camera.CameraCapture;
 import jp.vstone.camera.FaceDetectLib.FaceUser;
 import jp.vstone.camera.FaceDetectResult;
 import jp.vstone.sotatalk.SpeechRecog;
@@ -214,6 +215,14 @@ public class Test {
 									cam.StopFaceTraking();
 									writer.println("{\"result\": true}");
 									break;
+								case "start_face_detect":
+									cam.StartFaceDetect();
+									writer.println("{\"result\": true}");
+									break;
+								case "stop_face_detect":
+									cam.StopFaceDetect();
+									writer.println("{\"result\": true}");
+									break;
 								case "enable_face_estimation":
 									boolean smile = node.get("face_smile").booleanValue();
 									boolean search = node.get("face_search").booleanValue();
@@ -268,6 +277,9 @@ public class Test {
 									}
 									writer.println("{\"result\": true}");
 									break;
+								case "save_cam_image":
+									cam.initStill(new CameraCapture(CameraCapture.CAP_IMAGE_SIZE_VGA, CameraCapture.CAP_FORMAT_MJPG));
+									cam.StillPicture("/home/root/image");
 								case "status":
 									CommuStatus status = new CommuStatus();
 									status.is_speaking = speech_say_thread.is_speaking();
@@ -284,8 +296,6 @@ public class Test {
 								default:
 									System.out.println("未定義のコマンド："+command);
 									break;
-
-
 								}
 							} catch (Exception e) {
 								System.out.println("コマンド解析エラー");

@@ -153,6 +153,15 @@ class PyCommu():
         self._send( "stop_face_track" )
         return self._read_data()
 
+    def start_face_detection(self):
+        self._send( "start_face_detect" )
+        return self._read_data()
+
+    def stop_face_detection(self):
+        self._send( "stop_face_detect" )
+        return self._read_data()
+
+
     def enable_face_estimation(self, search, smile, age_sex ):
         self._send("enable_face_estimation", face_search=search, face_smile=smile, age_and_sex=age_sex )
         return self._read_data()
@@ -186,9 +195,15 @@ class PyCommu():
         self._send("remove_all_user")
         return self._read_data()
 
+    def save_camera_image(self):
+        self._send("save_cam_image")
+        return self._read_data()
+
+
 def main():
     commu = PyCommu("sota")
     commu.connect("192.168.1.12")
+    commu.save_camera_image()
 
 if __name__ == '__main__':
     main()
