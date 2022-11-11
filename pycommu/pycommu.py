@@ -84,7 +84,7 @@ class PyCommu():
         return self._read_data()
 
     def set_pose(self,angles, ids, time=1000):
-        self._send( "set_pose", angles=angles, ids=ids, time=time )
+        self._send( "set_pose", angles=list(angles), ids=list(ids), time=time )
         return self._read_data()
 
     def get_pose(self):

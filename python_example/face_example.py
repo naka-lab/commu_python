@@ -4,7 +4,10 @@ import pycommu
 import time
 
 def main():
+    # ロボットは引数で切り替える
+    #commu = pycommu.PyCommu("commu")
     commu = pycommu.PyCommu("sota")
+
     commu.connect("192.168.1.12")
 
     commu.enable_torque()
