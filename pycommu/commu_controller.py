@@ -3,6 +3,7 @@ from tkinter import ttk
 import pycommu
 import tkinter.simpledialog as simpledialog
 import sys
+import time
 
 MOTOR_ID_COMMU2SOTA = [None, None, 1, 2, 3, 4, 5, 7, 8, 6, None, None, None, None]
 
@@ -133,11 +134,60 @@ def main():
     tk.Button( frame, text="発話", command=lambda: commu.say(say_entry.get()) ).pack(side="left")
     frame.pack()
 
+    # 顔認識関連
+    frame = tk.Frame(root, bd=2, relief="groove")
+    face_recog_entry = tk.Entry(frame,width=30)
+    face_recog_entry.pack(side="left")
+    def face_recog():
+        commu.set_pose( [-150,0,0], [7,8,6], 500 )
+        commu.enable_face_estimation( True, True, True )
+        commu.start_face_detection()
+        for i in range(100):
+            face_info = commu.get_face_info()
+
+            if face_info["is_detected"]:
+                face_recog_entry.delete(0,tk.END)
+                face_recog_entry.insert(0, f"名前:{face_info['name']}, 年齢:{face_info['age']}, 性別:{face_info['sex']}, 笑顔度:{face_info['smile_score']}" )
+                commu.say("顔検出成功．")
+                if face_info["name"]!="":
+                    commu.say( face_info["name"] + "さんだね．")
+                break
+            time.sleep(0.1)
+        else:
+            commu.say("顔検出失敗")
+    tk.Button( frame, text="顔認識", command=face_recog).pack(side="left")
+    frame.pack()
+
+    # 顔学習
+    frame = tk.Frame(root, bd=2, relief="groove")
+    face_learn_entry = tk.Entry(frame,width=30)
+    face_learn_entry.insert(0, "名前を入力してください")
+    face_learn_entry.pack(side="left")
+    def face_learn():
+        commu.set_pose( [-150,0,0], [7,8,6], 500 )
+        commu.enable_face_estimation( True, True, True )
+        commu.start_face_detection()
+        for i in range(100):
+            face_info = commu.get_face_info()
+
+            if face_info["is_detected"]:
+                res = commu.add_user_data( face_learn_entry.get() )["result"]
+                if res:
+                    commu.say(face_learn_entry.get() + "さんの顔を覚えたよ")
+                    break
+            time.sleep(0.1)
+        else:
+            commu.say("顔学習失敗")
+
+    tk.Button( frame, text="顔学習", command=face_learn).pack(side="left")
+    tk.Button( frame, text="顔削除", command=lambda: commu.remove_all_user() ).pack(side="left")
+    frame.pack()
+
     root.mainloop()
 
 if __name__=="__main__":
     root = tk.Tk()
-    root.title("stretch controller")
+    root.title("CommU Controller")
 
     commu = pycommu.PyCommu()
 
