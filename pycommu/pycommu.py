@@ -54,7 +54,7 @@ class PyCommu():
 
         return json.loads(data.decode("utf-8"))
 
-    def _send( self, command, content=None, angles=None, ids=None, time=None, timeout=None, face_smile=None, face_search=None, age_and_sex=None, name=None ):
+    def _send( self, command, content=None, angles=None, ids=None, time=None, timeout=None, retry=None, face_smile=None, face_search=None, age_and_sex=None, name=None ):
         data = {}
         data["com"] = command
 
@@ -63,11 +63,11 @@ class PyCommu():
         if ids is not None: data["ids"] = ids
         if time is not None: data["time"] = time
         if timeout is not None: data["timeout"] = timeout
+        if retry is not None: data["retry"] = retry
         if face_smile is not None: data["face_smile"] = face_smile
         if face_search is not None: data["face_search"] = face_search
         if age_and_sex is not None: data["age_and_sex"] = age_and_sex
         if name is not None: data["name"] = name
-
 
         line = json.dumps(data)+"\n"
         self.soc.send(bytes( line, 'utf-8'))
@@ -121,9 +121,9 @@ class PyCommu():
             elif res!="":
                 return res
 
-    def wait_for_speech_yesno(self, timeout=None):
+    def wait_for_speech_yesno(self, timeout=None, retry=5):
         while 1:
-            self._send( "get_yes_no", timeout= timeout if timeout is not None else 5000 )
+            self._send( "get_yes_no", timeout= timeout if timeout is not None else 10000, retry=retry )
             res = self._read_data()
             print(res)
             res = res["string"]
@@ -133,9 +133,9 @@ class PyCommu():
             elif res!="":
                 return res
 
-    def wait_for_speech_name(self, timeout=None):
+    def wait_for_speech_name(self, timeout=None, retry=5):
         while 1:
-            self._send( "get_recog_name", timeout= timeout if timeout is not None else 5000 )
+            self._send( "get_recog_name", timeout= timeout if timeout is not None else 10000, retry=retry )
             res = self._read_data()
             print(res)
             res = res["string"]
@@ -160,7 +160,6 @@ class PyCommu():
     def stop_face_detection(self):
         self._send( "stop_face_detect" )
         return self._read_data()
-
 
     def enable_face_estimation(self, search, smile, age_sex ):
         self._send("enable_face_estimation", face_search=search, face_smile=smile, age_and_sex=age_sex )
@@ -188,7 +187,6 @@ class PyCommu():
                 print("Out of Range Face Size")
             elif res["code"]==-400:
                 print("Low FocusScore")
-            
         return res
 
     def remove_all_user(self):
@@ -203,7 +201,7 @@ class PyCommu():
 def main():
     commu = PyCommu("sota")
     commu.connect("192.168.1.12")
-    commu.save_camera_image()
+    print( commu.wait_for_speech_name(timeout=5000, retry=5) )
 
 if __name__ == '__main__':
     main()

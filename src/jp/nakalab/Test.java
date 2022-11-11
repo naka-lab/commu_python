@@ -81,9 +81,6 @@ public class Test {
 		CRobotPose pose;
 		CRobotMem mem = new CRobotMem();
 
-		int timeout;
-		RecogResult result;
-
 		if (mem.Connect() == false) {
 			System.out.println("commuとの接続失敗");
 			return;
@@ -132,6 +129,10 @@ public class Test {
 
 					String line = null;
 					FaceUser detected_user = null;
+					int timeout;
+					RecogResult result;
+					int retry;
+
 
 					while (true) {
 						line = reader.readLine();
@@ -188,7 +189,8 @@ public class Test {
 									break;
 								case "get_yes_no":
 									timeout = node.get("timeout").intValue();
-									String yesno = recog.getYesorNo(timeout, 10);
+									retry = node.get("retry").intValue();
+									String yesno = recog.getYesorNo(timeout, retry);
 									if (yesno == null) {
 										writer.println("{\"result\":false, \"string\":\"\"}");
 									} else if (yesno == "YES") {
@@ -199,7 +201,8 @@ public class Test {
 									break;
 								case "get_recog_name":
 									timeout = node.get("timeout").intValue();
-									String name = recog.getName(timeout, 10);
+									retry = node.get("retry").intValue();
+									String name = recog.getName(timeout, retry);
 									System.out.println(timeout);
 									if (name != null) {
 										writer.println(String.format("{\"result\": true, \"string\":\"%s\"}", name));
