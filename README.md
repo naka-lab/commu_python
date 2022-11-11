@@ -65,15 +65,18 @@ CommUとSotaをPythonから制御するためのプログラム．
 - SSHで接続して`./run_server.sh`を実行（wifi接続，IPの確認，SSH接続は前述の「CommUのネットワーク接続」を参照）
 
 ### リモートPC
+IPは各自の環境に合わせて変更する
 - GUIでCommUを操作するプログラム
   ```
   cd pycommu
   python commu_controller.py
   ```
-- pythonからCommUを操作するプログラム例（IPは各自の環境に合わせて変更する）
+- pythonからCommUを操作するプログラム例
   - CommUの場合：[commu_example.py](python_example/commu_example.py)
   - Sotaの場合：[sota_example.py](python_example/sota_example.py)
-- ランダムに動いて発話する関数の使用例（IPは各自の環境に合わせて変更する）：[tts_example.py](python_example/tts_example.py)
+- ランダムに動いて発話する関数の使用例：[tts_example.py](python_example/tts_example.py)
+- 顔認証・笑顔推定・年齢推定・性別推定の使用例：[face_example.py](python_example/face_example.py)
+- 動作を記録再生するプログラム：[record_motion.py](python_example/record_motion.py)
 
 ## 仕組み
 - [ロボット内部で動いているJAVAプログラム](src/jp/nakalab/Test.java)と[リモートPCで動かすPythonプログラム](pycommu/pycommu.py)間でSocket通信でコマンドをやりとりすることでCommUをコントロール
