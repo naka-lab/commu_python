@@ -132,6 +132,8 @@ def main():
     say_entry = tk.Entry(frame,width=30)
     say_entry.pack(side="left")
     tk.Button( frame, text="発話", command=lambda: commu.say(say_entry.get()) ).pack(side="left")
+    tk.Button( frame, text="オンライン音声", command=lambda: commu.enable_openjtalk(False) ).pack(side="left")
+    tk.Button( frame, text="オフライン音声", command=lambda: commu.enable_openjtalk(True) ).pack(side="left")
     frame.pack()
 
     # 顔認識関連

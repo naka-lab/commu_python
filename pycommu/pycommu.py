@@ -54,11 +54,12 @@ class PyCommu():
 
         return json.loads(data.decode("utf-8"))
 
-    def _send( self, command, content=None, angles=None, ids=None, time=None, timeout=None, retry=None, face_smile=None, face_search=None, age_and_sex=None, name=None ):
+    def _send( self, command, content=None, flag=None, angles=None, ids=None, time=None, timeout=None, retry=None, face_smile=None, face_search=None, age_and_sex=None, name=None ):
         data = {}
         data["com"] = command
 
         if content is not None: data["content"] = content
+        if flag is not None: data["flag"] = flag
         if angles is not None: data["angles"] = angles
         if ids is not None: data["ids"] = ids
         if time is not None: data["time"] = time
@@ -74,6 +75,10 @@ class PyCommu():
 
     def say(self, content):
         self._send( "say", content=content )
+        return self._read_data()
+
+    def enable_openjtalk(self, enables=True ):
+        self._send( "enable_jtalk", flag=enables )
         return self._read_data()
 
     def enable_torque(self, enables=True):
@@ -201,7 +206,9 @@ class PyCommu():
 def main():
     commu = PyCommu("sota")
     commu.connect("192.168.1.12")
-    print( commu.wait_for_speech_name(timeout=5000, retry=5) )
+    commu.enable_openjtalk(True)
+    commu.say("テスト")
+    commu.wait_for_speaking_finished()
 
 if __name__ == '__main__':
     main()

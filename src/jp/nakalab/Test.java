@@ -29,13 +29,26 @@ import jp.vstone.sotatalk.TextToSpeechSota;
 class SpeechSayThread extends Thread {
 	ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<String>();
 	boolean is_speaking = false;
+	boolean uses_jtalk = false;
 
 	public void run() {
 		while (true) {
 			String content = this.queue.poll();
 			if (content != null) {
 				this.is_speaking = true;
-				CPlayWave.PlayWave(TextToSpeechSota.getTTS(content), true);
+				if( !this.uses_jtalk ){
+					CPlayWave.PlayWave(TextToSpeechSota.getTTS(content), true);
+				}
+				else{
+					try{
+						Process p = Runtime.getRuntime().exec( new String[]{ "./openjtalk.sh", content, "tmp.wav" } );
+						p.waitFor();
+						CPlayWave.PlayWave("tmp.wav", true);
+					}catch (Exception e) {
+						System.out.println("open jtal エラー");
+						e.printStackTrace();
+					}
+				}
 			} else {
 				this.is_speaking = false;
 
@@ -44,7 +57,6 @@ class SpeechSayThread extends Thread {
 				} catch (Exception e) {
 				}
 			}
-
 		}
 	}
 
@@ -55,6 +67,10 @@ class SpeechSayThread extends Thread {
 	public void say(String content) {
 		this.is_speaking = true;
 		this.queue.add(content);
+	}
+
+	public void enable_jtalk( boolean enable ){
+		this.uses_jtalk = enable;
 	}
 }
 
@@ -147,6 +163,11 @@ public class Test {
 								case "say":
 									String content = node.get("content").textValue();
 									speech_say_thread.say(content);
+									writer.println("{\"result\": true}");
+									break;
+								case "enable_jtalk":
+									boolean flag = node.get("flag").booleanValue();
+									speech_say_thread.enable_jtalk(flag);
 									writer.println("{\"result\": true}");
 									break;
 								case "servo_on":
