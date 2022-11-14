@@ -53,7 +53,45 @@ CommUとSotaをPythonから制御するためのプログラム．
       chmod +x *.sh
       ./java_run.sh jp/nakalab/Test sota
       ```
-- 実行権限をつける：`chmod +x run_server.sh`
+  - 実行権限をつける：`chmod +x run_server.sh`
+
+- open jtalkのインストール（open jtalkを発話で使う場合，使わなければこの操作は不要）
+  - hts_engineをインストール
+    ```
+    cd ~/
+    mkdir openjtalk
+    cd openjtalk/
+    wget http://downloads.sourceforge.net/hts-engine/hts_engine_API-1.09.tar.gz
+    tar xzvf hts_engine_API-1.09.tar.gz
+    cd hts_engine_API-1.09/
+    ./configure
+    make
+    make install
+    ```
+  - open jtalkをインストール
+    ```
+    cd ~/openjtalk/
+    wget http://downloads.sourceforge.net/open-jtalk/open_jtalk-1.08.tar.gz
+    tar xzvf open_jtalk-1.08.tar.gz
+    cd open_jtalk-1.08/
+    ./configure \
+         --with-hts-engine-header-path=/usr/local/include \
+         --with-hts-engine-library-path=/usr/local/lib \
+         --with-charset=utf-8
+    make
+    make install
+    ```
+  - 発話に必要なファイルをダウンロード
+    ```
+    cd ~/openjtalk/
+    wget http://downloads.sourceforge.net/open-jtalk/open_jtalk_dic_utf_8-1.08.tar.gz
+    wget http://downloads.sourceforge.net/open-jtalk/hts_voice_nitech_jp_atr503_m001-1.05.tar.gz
+    wget http://sourceforge.net/projects/mmdagent/files/MMDAgent_Example/MMDAgent_Example-1.4/MMDAgent_Example-1.4.zip --no-check-certificate
+    
+    tar xzvf open_jtalk_dic_utf_8-1.08.tar.gz
+    tar xzvf hts_voice_nitech_jp_atr503_m001-1.05.tar.gz
+    unzip MMDAgent_Example-1.4.zip
+    ```
 
 ### Javaプログラムのコンパイル・転送
 - [この手順](http://www.vstone.co.jp/sotamanual/index.php?Java%E3%81%A7%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%E3%82%92%E3%81%97%E3%81%A6%E3%81%BF%E3%82%8B%2F%E6%BA%96%E5%82%99)に従い
