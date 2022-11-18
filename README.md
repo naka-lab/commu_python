@@ -92,7 +92,15 @@ CommUとSotaをPythonから制御するためのプログラム．
     tar xzvf hts_voice_nitech_jp_atr503_m001-1.05.tar.gz
     unzip MMDAgent_Example-1.4.zip
     ```
-
+- ffmepgのインストール（外部でCommUのカメラ画像を取得したい場合）
+  ```
+  mkdir ffmpeg
+  cd ffmpeg
+  wget wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-i686-static.tar.xz
+  tar xf ffmpeg-release-i686-static.tar.xz
+  mv ffmpeg-5.1.1-i686-static bin
+  ```
+  - ffmpegのURLは[ここ](https://johnvansickle.com/ffmpeg/)で確認する
 ### Javaプログラムのコンパイル・転送
 - [この手順](http://www.vstone.co.jp/sotamanual/index.php?Java%E3%81%A7%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%E3%82%92%E3%81%97%E3%81%A6%E3%81%BF%E3%82%8B%2F%E6%BA%96%E5%82%99)に従い
 環境構築し，このリポジトリをコンパイル・転送する．
@@ -115,6 +123,17 @@ IPは各自の環境に合わせて変更する
 - ランダムに動いて発話する関数の使用例：[tts_example.py](python_example/tts_example.py)
 - 顔認証・笑顔推定・年齢推定・性別推定の使用例：[face_example.py](python_example/face_example.py)
 - 動作を記録再生するプログラム：[record_motion.py](python_example/record_motion.py)
+
+## カメラ画像を外部で受け取る場合
+### CommU・Sotaの内部PC
+- SSHで接続する
+- 受信側のIPアドレスを指定して，ffmpegで画像を配信
+  ```
+  ./ffmpeg/bin/ffmpeg -s 640x480 -f video4linux2 -i /dev/video0 -f mpeg1video -r 30 udp://(受信側のIPアドレス):1234
+  ```
+
+### リモートPC（受信側）
+- 受信プログラム例：[camera.py](pythoh_example/camera.py)
 
 ## 仕組み
 - [ロボット内部で動いているJAVAプログラム](src/jp/nakalab/Test.java)と[リモートPCで動かすPythonプログラム](pycommu/pycommu.py)間でSocket通信でコマンドをやりとりすることでCommUをコントロール
