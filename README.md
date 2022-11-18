@@ -129,7 +129,7 @@ IPは各自の環境に合わせて変更する
 - SSHで接続する
 - 受信側のIPアドレスを指定して，ffmpegで画像を配信
   ```
-  ./ffmpeg/bin/ffmpeg -s 640x480 -f video4linux2 -i /dev/video0 -f mpeg1video -r 30 udp://(受信側のIPアドレス):1234
+  ./ffmpeg/bin/ffmpeg -s 640x480 -f video4linux2 -i /dev/video0 -f mpeg1video -r 30 udp://(受信側のIPアドレス):12345
   ```
 
 ### リモートPC（受信側）
