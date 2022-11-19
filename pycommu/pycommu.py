@@ -1,3 +1,5 @@
+# coding: utf8
+from __future__ import print_function, unicode_literals
 import socket
 import json
 import time
@@ -71,7 +73,10 @@ class PyCommu():
         if name is not None: data["name"] = name
 
         line = json.dumps(data)+"\n"
-        self.soc.send(bytes( line, 'utf-8'))
+        try:
+            self.soc.send(bytes( line, 'utf-8'))
+        except TypeError:
+            self.soc.send(bytes( line ))
 
     def say(self, content):
         self._send( "say", content=content )
