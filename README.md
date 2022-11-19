@@ -133,7 +133,7 @@ IPは各自の環境に合わせて変更する
   ```
 
 ### リモートPC（受信側）
-- 受信プログラム例：[camera.py](pythoh_example/camera.py)
+- 受信プログラム例：[camera.py](python_example/camera.py)
 
 ## 仕組み
 - [ロボット内部で動いているJAVAプログラム](src/jp/nakalab/Test.java)と[リモートPCで動かすPythonプログラム](pycommu/pycommu.py)間でSocket通信でコマンドをやりとりすることでCommUをコントロール
