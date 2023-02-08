@@ -32,6 +32,7 @@ class PyCommu():
 
     def __init__(self, mode="commu"):
         self.set_mode( mode )
+        self.soc = None
 
     def get_mode(self):
         return self.mode
@@ -42,11 +43,24 @@ class PyCommu():
         self.mode = mode
 
     def connect(self, ip, port=5000 ):
+        self.disconnect()
         self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.soc.connect((ip, 5000))
         self.soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    def disconnect(self):
+        if self.soc is not None:
+            self.soc.close()
+            self.soc = None
+    
+    def is_connected(self):
+        return self.soc is not None
     
     def _read_data(self):
+        if self.soc is None:
+            print("Coomu: 接続していません")
+            return None
+
         data = b""
         while 1:
             b = self.soc.recv(1)
@@ -57,6 +71,10 @@ class PyCommu():
         return json.loads(data.decode("utf-8"))
 
     def _send( self, command, content=None, flag=None, angles=None, ids=None, time=None, timeout=None, retry=None, face_smile=None, face_search=None, age_and_sex=None, name=None ):
+        if self.soc is None:
+            print("Coomu: 接続していません")
+            return None
+
         data = {}
         data["com"] = command
 
