@@ -3,21 +3,24 @@ from __future__ import print_function, unicode_literals
 import pycommu
 import random
 import time
+import threading
 
 default_pose_commu = [3, -4, 901, 7, -903, -11, 12, -1, 11, -13, -2, 10, -19, 9]
 default_pose_sota = [8, -903, -7, 903, -2, 3, -9, 3]
 
+
 def set_default_pose(commu):
-    if commu.get_mode()=="commu":
+    if commu.get_mode() == "commu":
         default_pose = default_pose_commu
     else:
         default_pose = default_pose_sota
-    commu.set_pose( default_pose, list(range(1,len(default_pose)+1)) )
+    commu.set_pose(default_pose, list(range(1, len(default_pose) + 1)))
+
 
 def say_and_move_randomly(commu, content):
-    commu.say( content )
+    commu.say(content)
 
-    if commu.get_mode()=="commu":
+    if commu.get_mode() == "commu":
         poses = [
             default_pose_commu,
             [3, -4, -526, -197, 580, 150, -200, -2, 8],
@@ -45,21 +48,29 @@ def say_and_move_randomly(commu, content):
 
     n = 0
     while commu.is_speaking():
-        if commu.get_mode()=="commu":
+        if commu.get_mode() == "commu":
             # commuであれば口パクする
-            if n%2==0:
+            if n % 2 == 0:
                 commu.set_pose([550], [14], 100)
             else:
                 commu.set_pose([0], [14], 100)
 
-        if n%6==0:
+        if n % 6 == 0:
             p = random.choice(poses)
-            commu.set_pose( p, list(range(1,len(p)+1)), 1000 )
+            commu.set_pose(p, list(range(1, len(p) + 1)), 1000)
             commu.wait_for_moving_finished()
 
-        n+=1
+        n += 1
         time.sleep(0.1)
 
-    commu.set_pose( default_pose, list(range(1,len(default_pose)+1)) )
+    commu.set_pose(default_pose, list(range(1, len(default_pose) + 1)))
     commu.wait_for_moving_finished()
 
+
+__lock_say = threading.Lock()
+def say_and_move_randomly_async(commu, content):
+    def say_thread(commu, content):
+        with __lock_say:
+            say_and_move_randomly(commu, content)
+
+    threading.Thread(target=say_thread, args=(commu, content)).start()
