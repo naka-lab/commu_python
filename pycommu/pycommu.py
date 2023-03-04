@@ -159,8 +159,7 @@ class PyCommu:
             return self._read_data()
 
     def is_speaking(self):
-        with self.__lock:
-            return self.get_status()["is_speaking"]
+        return self.get_status()["is_speaking"]
 
     def wait_for_speaking_finished(self):
         with self.__lock:
@@ -168,13 +167,11 @@ class PyCommu:
                 time.sleep(0.1)
 
     def is_moving(self):
-        with self.__lock:
-            return self.get_status()["is_moving"]
+        return self.get_status()["is_moving"]
 
     def wait_for_moving_finished(self):
-        with self.__lock:
-            while self.is_moving():
-                time.sleep(0.1)
+        while self.is_moving():
+            time.sleep(0.1)
 
     def wait_for_speech_recognition(self, timeout=None):
         with self.__lock:
