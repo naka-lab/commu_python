@@ -162,9 +162,8 @@ class PyCommu:
         return self.get_status()["is_speaking"]
 
     def wait_for_speaking_finished(self):
-        with self.__lock:
-            while self.is_speaking():
-                time.sleep(0.1)
+        while self.is_speaking():
+            time.sleep(0.1)
 
     def is_moving(self):
         return self.get_status()["is_moving"]
