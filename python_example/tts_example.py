@@ -9,7 +9,11 @@ def main():
     #commu = pycommu.PyCommu("commu")
  
     # commuへ接続
-    commu.connect("192.168.1.12")
+    commu.connect("192.168.1.68")
+
+    commu.enable_torque()
+    #commu.enable_openjtalk()
+    commu.enable_voicevox()
 
     # デフォルトのポーズへ移動
     commu_actions.set_default_pose(commu)

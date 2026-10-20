@@ -4,7 +4,12 @@ import socket
 import json
 import time
 import threading
+from enum import Enum
 
+class VoiceEngine(Enum):
+    SOTA = 1
+    OPEN_JTALK = 2
+    VOICE_VOX = 3
 
 class PyCommu:
     # 関節IDの定義（C_*:Commu, S_:Sota）
@@ -36,6 +41,8 @@ class PyCommu:
         self.set_mode(mode)
         self.soc = None
         self.__lock = threading.Lock()
+        self.voice_sysnthesis_engine = VoiceEngine.SOTA
+        self.is_speaking_voicevox = False
 
     def get_mode(self):
         return self.mode
@@ -51,6 +58,8 @@ class PyCommu:
         s.connect((ip, 5000))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.soc = s
+
+        self.ip = ip
 
     def disconnect(self):
         if self.soc is not None:
@@ -126,14 +135,48 @@ class PyCommu:
             self.soc.send(bytes(line))
 
     def say(self, content):
-        with self.__lock:
-            self._send("say", content=content)
-            return self._read_data()
+        if self.voice_sysnthesis_engine!=VoiceEngine.VOICE_VOX:
+            with self.__lock:
+                self._send("say", content=content)
+                return self._read_data()
+        else:
+            def speak_voicevox( pycommu ):
+                pycommu.is_speaking_voicevox = True
+                pycommu.voicevox.synthesis( content, "tmp.wav" )
+                sftp = pycommu.ssh_client.open_sftp()
+                sftp.put( "tmp.wav", "tmp.wav" )
+                stdin, stdout, stderr = pycommu.ssh_client.exec_command("aplay -D plughw:2,0 tmp.wav")
+                for line in stderr:
+                    print(line.strip())
+                pycommu.is_speaking_voicevox = False
+
+            th = threading.Thread( target=speak_voicevox, args=(self,))
+            th.daemon = False
+            th.start()
 
     def enable_openjtalk(self, enables=True):
+        if enables:
+            self.voice_sysnthesis_engine=VoiceEngine.OPEN_JTALK
+        else:
+            self.voice_sysnthesis_engine=VoiceEngine.SOTA
+
         with self.__lock:
             self._send("enable_jtalk", flag=enables)
             return self._read_data()
+
+    def enable_voicevox(self, enables=True, voicevox_ip="127.0.0.1", speaker=2 ):
+        if enables:
+            self.voice_sysnthesis_engine=VoiceEngine.VOICE_VOX
+        else:
+            self.voice_sysnthesis_engine=VoiceEngine.SOTA
+
+        import paramiko
+        import voicevox
+        self.ssh_client = paramiko.SSHClient()
+        self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.ssh_client.connect(hostname=self.ip, username="root", password="edison00")
+        self.voicevox = voicevox.Voicevox( voicevox_ip, speaker)
+
 
     def enable_torque(self, enables=True):
         with self.__lock:
@@ -159,7 +202,7 @@ class PyCommu:
             return self._read_data()
 
     def is_speaking(self):
-        return self.get_status()["is_speaking"]
+        return self.get_status()["is_speaking"] or self.is_speaking_voicevox
 
     def wait_for_speaking_finished(self):
         while self.is_speaking():
@@ -290,8 +333,13 @@ class PyCommu:
 
 def main():
     commu = PyCommu("sota")
-    commu.connect("192.168.1.12")
-    commu.enable_openjtalk(True)
+    commu.connect("192.168.1.68")
+    #commu.enable_openjtalk(True)
+    #commu.say("テスト")
+    #commu.wait_for_speaking_finished()
+
+
+    commu.enable_voicevox()
     commu.say("テスト")
     commu.wait_for_speaking_finished()
 

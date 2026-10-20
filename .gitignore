@@ -1,3 +1,5 @@
 
 .DS_Store
 *.pyc
+pycommu/tmp.wav
+python_example/tmp.wav
