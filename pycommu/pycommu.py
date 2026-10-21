@@ -1,10 +1,12 @@
-# coding: utf8
-from __future__ import print_function, unicode_literals
+import os
 import socket
 import json
 import time
 import threading
 from enum import Enum
+import paramiko
+import voicevox
+import hashlib
 
 class VoiceEngine(Enum):
     SOTA = 1
@@ -134,23 +136,36 @@ class PyCommu:
         except TypeError:
             self.soc.send(bytes(line))
 
+    def _say_voicevox( self, content ):
+
+        CACHE_DIR = "cache_voicevox"
+        if not os.path.exists(CACHE_DIR):
+            os.mkdir(CACHE_DIR)
+
+        hash = hashlib.md5(content.encode("utf8")).hexdigest()
+        file_name = os.path.join( CACHE_DIR, hash+".wav" )
+
+        self.is_speaking_voicevox = True
+
+        # ファイルがなければ合成，あれば再利用
+        if not os.path.exists(file_name):
+            self.voicevox.synthesis( content, file_name )
+
+        sftp = self.ssh_client.open_sftp()
+        sftp.put( file_name, "tmp.wav" )
+        stdin, stdout, stderr = self.ssh_client.exec_command("aplay -D plughw:2,0 tmp.wav")
+        for line in stderr:
+            print(line.strip())
+        self.is_speaking_voicevox = False
+
     def say(self, content):
         if self.voice_sysnthesis_engine!=VoiceEngine.VOICE_VOX:
             with self.__lock:
                 self._send("say", content=content)
                 return self._read_data()
         else:
-            def speak_voicevox( pycommu ):
-                pycommu.is_speaking_voicevox = True
-                pycommu.voicevox.synthesis( content, "tmp.wav" )
-                sftp = pycommu.ssh_client.open_sftp()
-                sftp.put( "tmp.wav", "tmp.wav" )
-                stdin, stdout, stderr = pycommu.ssh_client.exec_command("aplay -D plughw:2,0 tmp.wav")
-                for line in stderr:
-                    print(line.strip())
-                pycommu.is_speaking_voicevox = False
 
-            th = threading.Thread( target=speak_voicevox, args=(self,))
+            th = threading.Thread( target=self._say_voicevox, args=(content,))
             th.daemon = False
             th.start()
 
@@ -170,8 +185,6 @@ class PyCommu:
         else:
             self.voice_sysnthesis_engine=VoiceEngine.SOTA
 
-        import paramiko
-        import voicevox
         self.ssh_client = paramiko.SSHClient()
         self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.ssh_client.connect(hostname=self.ip, username="root", password="edison00")

@@ -11,7 +11,7 @@ class Voicevox():
                             params={'text': text, 'speaker': self.speaker})
         res2 = requests.post('http://' + self.host + ':50021/synthesis',
                             params={'speaker': self.speaker},
-                            data=json.dumps(res1.json()))
+                            json=res1.json())
         with open(filename, mode='wb') as f:
             f.write(res2.content)
 
